@@ -8,7 +8,7 @@
 import UIKit
 
 final class ViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -16,24 +16,51 @@ final class ViewController: UIViewController {
     
 }
 
-protocol AuthManagerProtocol {
-    var isLoggedIn: Bool { get }
+protocol LoggerProtocol {
+    func sendLog(message: String)
 }
 
-final class StubAuthManager: AuthManagerProtocol {
-    var isLoggedIn: Bool = false
+final class MockLogger: LoggerProtocol {
+    var invokedSendLog = false
+    var invokedSendLogCount = 0
+    var sendLogProperties = [String]()
+    
+    func sendLog(message: String) {
+        invokedSendLog = true
+        invokedSendLogCount += 1
+        sendLogProperties.append(message)
+    }
 }
 
-final class DialogManager {
-    private let authManager: AuthManagerProtocol
-    init(authManager: AuthManagerProtocol) {
-        self.authManager = authManager
+final class Calculator {
+    private let logger: LoggerProtocol
+    init(logger: LoggerProtocol) {
+        self.logger = logger
     }
     
-    var shouldShowLoginDialog: Bool {
-        return !authManager.isLoggedIn
+    private enum CalcAction {
+        case add(Int)
+        
+    }
+    private var calcActions = [CalcAction]()
+    
+    func add(num: Int) {
+        calcActions.append(.add(num))
+    }
+    
+    func calc() -> Int {
+        logger.sendLog(message: "Start Calc.")
+        var total = 0
+        calcActions.forEach { calcAction in
+            switch calcAction {
+                case .add(let num):
+                    logger.sendLog(message: "Add \(num).")
+                    total += num
+            }
+        }
+        logger.sendLog(message: "Total is \(total)")
+        logger.sendLog(message: "Finish calc.")
+        return total
     }
     
 }
-
-

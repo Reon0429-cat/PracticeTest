@@ -10,24 +10,21 @@ import XCTest
 
 class PracticeTestTests: XCTestCase {
     
-    
-    
-    
-    func testShowLoginDialog_ログイン済み() {
-        let stubAuthManager = StubAuthManager()
-        stubAuthManager.isLoggedIn = true
-        let dialogManager = DialogManager(authManager: stubAuthManager)
-        XCTAssertFalse(dialogManager.shouldShowLoginDialog)
+    func testAdd() {
+        let mockLogger = MockLogger()
+        let calculator = Calculator(logger: mockLogger)
+        let expectedMessages = [
+            "Start Calc.",
+            "Add 1.",
+            "Total is 1",
+            "Finish calc."
+        ]
+        calculator.add(num: 1)
+        XCTAssertEqual(calculator.calc(), 1)
+        XCTAssertTrue(mockLogger.invokedSendLog)
+        XCTAssertEqual(mockLogger.invokedSendLogCount, 4)
+        XCTAssertEqual(mockLogger.sendLogProperties, expectedMessages)
     }
-    
-    func testShowLoginDialog_未ログイン() {
-        let stubAuthManager = StubAuthManager()
-        stubAuthManager.isLoggedIn = false
-        let dialogManager = DialogManager(authManager: stubAuthManager)
-        XCTAssertTrue(dialogManager.shouldShowLoginDialog)
-    }
-    
-    
     
     
     
