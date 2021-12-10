@@ -9,28 +9,20 @@ import XCTest
 @testable import PracticeTest
 
 class PracticeTestTests: XCTestCase {
+
+    private var userManager: UserManager!
     
-    func testAdd() {
-        let mockLogger = MockLogger()
-        let calculator = Calculator(logger: mockLogger)
-        let expectedMessages = [
-            "Start Calc.",
-            "Add 1.",
-            "Total is 1",
-            "Finish calc."
-        ]
-        calculator.add(num: 1)
-        XCTAssertEqual(calculator.calc(), 1)
-        XCTAssertTrue(mockLogger.invokedSendLog)
-        XCTAssertEqual(mockLogger.invokedSendLogCount, 4)
-        XCTAssertEqual(mockLogger.sendLogProperties, expectedMessages)
+    override func setUp() {
+        super.setUp()
+        
+        userManager = UserManager.shared
+        
     }
     
-    
-    
-    
-    
-    
+    override func tearDown() {
+        userManager = nil
+        
+    }
     
     
     

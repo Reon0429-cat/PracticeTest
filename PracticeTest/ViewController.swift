@@ -16,51 +16,53 @@ final class ViewController: UIViewController {
     
 }
 
-protocol LoggerProtocol {
-    func sendLog(message: String)
+struct User: Decodable {
+    let name: String
 }
 
-final class MockLogger: LoggerProtocol {
-    var invokedSendLog = false
-    var invokedSendLogCount = 0
-    var sendLogProperties = [String]()
+final class APIManager {
     
-    func sendLog(message: String) {
-        invokedSendLog = true
-        invokedSendLogCount += 1
-        sendLogProperties.append(message)
-    }
-}
-
-final class Calculator {
-    private let logger: LoggerProtocol
-    init(logger: LoggerProtocol) {
-        self.logger = logger
-    }
-    
-    private enum CalcAction {
-        case add(Int)
-        
-    }
-    private var calcActions = [CalcAction]()
-    
-    func add(num: Int) {
-        calcActions.append(.add(num))
-    }
-    
-    func calc() -> Int {
-        logger.sendLog(message: "Start Calc.")
-        var total = 0
-        calcActions.forEach { calcAction in
-            switch calcAction {
-                case .add(let num):
-                    logger.sendLog(message: "Add \(num).")
-                    total += num
+    func fetchUser(completion: @escaping ((Result<User, Error>) -> Void)) {
+        let url = URL(string: "https://tanaka.com/user")!
+        let request = URLRequest(url: url)
+        let session = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            guard let data = data else { return }
+            let decoder = JSONDecoder()
+            do {
+                let user = try decoder.decode(User.self, from: data)
+                completion(.success(user))
+            } catch {
+                completion(.failure(error))
             }
         }
-        logger.sendLog(message: "Total is \(total)")
-        logger.sendLog(message: "Finish calc.")
-        return total
+        session.resume()
     }
     
 }
+
+final class UserManager {
+    
+    static let shared = UserManager()
+    private init() { }
+    
+    private(set) var user: User?
+    
+    func fetchUser(completion: @escaping (() -> Void)) {
+        APIManager().fetchUser { [weak self] result in
+            switch result {
+                case .success(let user):
+                    self?.user = user
+                    completion()
+                case .failure(let error):
+                    print(error)
+            }
+        }
+    }
+    
+}
+
+
